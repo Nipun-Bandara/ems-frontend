@@ -53,7 +53,7 @@ export const ThemeToggle = ({ className }: { className?: string }) => {
         });
       }}
       className={cn(
-        "inline-flex cursor-pointer items-center justify-center whitespace-nowrap text-sm font-semibold disabled:pointer-events-none disabled:opacity-50 hover:bg-hoverPrimary h-11 w-11 relative rounded-full transition-all active:scale-90 sm:h-10 sm:w-10 sm:border-none sm:bg-transparent sm:shadow-none sm:backdrop-blur-none bg-transparent shadow-none backdrop-blur-none",
+        "inline-flex text-textPrimary cursor-pointer items-center justify-center whitespace-nowrap text-sm font-semibold disabled:pointer-events-none disabled:opacity-50 hover:bg-hoverPrimary h-11 w-11 relative rounded-full transition-all active:scale-90 sm:h-10 sm:w-10 sm:border-none sm:bg-transparent sm:shadow-none sm:backdrop-blur-none bg-transparent shadow-none backdrop-blur-none",
         className,
       )}
     >
