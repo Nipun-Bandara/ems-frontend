@@ -5,7 +5,7 @@ import "./globals.css";
 import { Toaster } from "@/app/components/ui/Sonner";
 import { AuthProvider } from "@/app/context/AuthContext";
 import ThemeProvider from "@/app/components/ui/ThemeProvider";
-import { cn } from "@/lib/utils";
+import { cn } from "@/app/lib/utils";
 
 const playfairDisplayHeading = Playfair_Display({subsets:['latin'],variable:'--font-heading'});
 

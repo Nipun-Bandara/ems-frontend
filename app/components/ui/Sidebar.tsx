@@ -1,5 +1,5 @@
 "use client";
-import { cn } from "@/lib/utils";
+import { cn } from "@/app/lib/utils";
 import React, { useState, createContext, useContext } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import Link from "next/link";
@@ -78,7 +78,7 @@ export const DesktopSidebar = ({
     <>
       <motion.div
         className={cn(
-          "h-screen px-2 py-4 hidden md:flex md:flex-col overflow-hidden bg-backgroundPrimary w-[300px] shrink-0",
+          "h-screen px-2 py-4 hidden md:flex md:flex-col bg-backgroundSecondary overflow-hidden w-[300px] shrink-0",
           className
         )}
         animate={{
@@ -104,7 +104,7 @@ export const MobileSidebar = ({
     <>
       <div
         className={cn(
-          "h-10 px-4 py-4 flex flex-row md:hidden  items-center justify-between bg-backgroundPrimary w-full"
+          "h-10 px-4 py-4 flex flex-row md:hidden items-center justify-between bg-backgroundPrimary w-full"
         )}
         {...props}
       >
@@ -157,7 +157,7 @@ export const SidebarLink = ({
     <Link
       href={link.href}
       className={cn(
-        "flex items-center justify-start gap-2 rounded-md px-3 py-2 transition-colors hover:bg-backgroundSecondary dark:hover:bg-hoverPrimary",
+        "flex items-center justify-start gap-2 rounded-md px-3 py-2 transition-colors hover:bg-hoverPrimary",
         className
       )}
       {...props}
