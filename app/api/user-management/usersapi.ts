@@ -24,7 +24,7 @@ export async function assignUser(
   payload: { role?: string; departmentId?: number | null }
 ): Promise<any> {
   const path = API_PATHS.USERS.USER_ASSIGNMENT.replace("{id}", String(userId));
-  const res = await axios.patch(path, payload);
+  const res = await axios.put(path, payload);
   return res.data;
 }
 

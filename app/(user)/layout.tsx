@@ -7,8 +7,8 @@ import { getNavItemsForRoles, ICONS_MAP } from "@/app/lib/navigation";
 import { cn } from "@/app/lib/utils";
 import Link from "next/link";
 import Image from "next/image";
-import { ThemeToggle } from "../../components/ui/ThemeToggle";
-import { Loader } from "../../components/ui/Loader";
+import { ThemeToggle } from "../components/ui/ThemeToggle";
+import { Loader } from "../components/ui/Loader";
 import { useEffect } from "react";
 
 export default function DashboardLayout({
@@ -43,7 +43,7 @@ export default function DashboardLayout({
 
     return (
         <div className={cn(
-            "flex h-screen w-full max-w-full overflow-hidden"
+            "flex h-screen w-full max-w-full flex-col overflow-hidden md:flex-row"
         )}>
             <Sidebar>
                 <SidebarContent user={user} links={links} />

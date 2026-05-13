@@ -1,6 +1,6 @@
 "use client";
 import { cn } from "@/app/lib/utils";
-import React, { useState, createContext, useContext } from "react";
+import React, { useEffect, useState, createContext, useContext } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
@@ -37,6 +37,15 @@ export const SidebarProvider = ({
   animate?: boolean;
 }) => {
   const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    const media = window.matchMedia("(max-width: 639px)");
+    const syncOpenState = () => setOpen(media.matches);
+
+    syncOpenState();
+    media.addEventListener("change", syncOpenState);
+    return () => media.removeEventListener("change", syncOpenState);
+  }, []);
 
   return (
     <SidebarContext.Provider value={{ open, setOpen, animate }}>

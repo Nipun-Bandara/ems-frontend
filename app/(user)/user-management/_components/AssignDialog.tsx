@@ -15,6 +15,7 @@ type Props = {
   onAssigned?: () => void;
 };
 
+
 const ROLE_OPTIONS: Role[] = ["SYSTEM_ADMIN", "DEPARTMENT_HEAD", "HR_MANAGER", "FINANCE_MANAGER", "EMPLOYEE", "USER"];
 
 export default function AssignDialog({ user, open, onClose, onAssigned }: Props) {
@@ -111,7 +112,7 @@ export default function AssignDialog({ user, open, onClose, onAssigned }: Props)
         {error && <div className="mb-3 text-sm text-red-600">{error}</div>}
 
         <div className="flex justify-end gap-2">
-          <Button variant="secondary" onClick={onClose} disabled={loading}>
+          <Button onClick={onClose} disabled={loading}>
             Cancel
           </Button>
           <Button onClick={submit} disabled={loading || (!canAssignRole && !canAssignDepartment)}>
