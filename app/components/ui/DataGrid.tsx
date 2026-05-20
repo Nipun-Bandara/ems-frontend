@@ -1,5 +1,4 @@
-import { DataGrid } from "@mui/x-data-grid";
-
+import { DataGrid, DataGridProps } from "@mui/x-data-grid";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 
@@ -20,7 +19,7 @@ function CustomNoRowsOverlay() {
   );
 }
 
-export default function CustomDataGrid({ rows, columns }) {
+export default function CustomDataGrid({ rows, columns, ...rest }: DataGridProps) {
   return (
     <Box
       sx={{
@@ -31,14 +30,9 @@ export default function CustomDataGrid({ rows, columns }) {
       <DataGrid
         rows={rows}
         columns={columns}
-        pageSize={10}
-        initialState={{
-          pagination: {
-            paginationModel: { page: 0, pageSize: 10 },
-          },
-        }}
         pageSizeOptions={[10, 50, 100]}
         slots={{ noRowsOverlay: CustomNoRowsOverlay }}
+        {...rest}
       />
     </Box>
   );

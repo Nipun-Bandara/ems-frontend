@@ -1,4 +1,4 @@
-import { DataGrid as MuiDataGrid } from "@mui/x-data-grid";
+import { DataGrid as MuiDataGrid, DataGridProps } from "@mui/x-data-grid";
 
 const gridSx = {
     border: 0,
@@ -16,15 +16,15 @@ const gridSx = {
     },
 };
 
-export default function CustomDataGrid({ rows, columns }: { rows: any[]; columns: any[] }) {
-    return (<MuiDataGrid
-        rows={rows}
-        columns={columns}
-        disableRowSelectionOnClick
-        pageSizeOptions={[5]}
-        initialState={{
-            pagination: { paginationModel: { pageSize: 5, page: 0 } },
-        }}
-        sx={gridSx}
-    />)
+export default function CustomDataGrid({ rows, columns, ...rest }: DataGridProps) {
+    return (
+        <MuiDataGrid
+            rows={rows}
+            columns={columns}
+            disableRowSelectionOnClick
+            pageSizeOptions={[10, 50, 100]}
+            sx={gridSx}
+            {...rest}
+        />
+    );
 }

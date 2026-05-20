@@ -23,31 +23,31 @@ export const NAV_ITEMS: NavItem[] = [
   {
     id: "user-management",
     label: "User Management",
-    href: "/dashboard/user-management",
+    href: "user-management",
     roles: ["SYSTEM_ADMIN", "DEPARTMENT_HEAD"],
   },
   {
     id: "settings",
     label: "Settings",
-    href: "/dashboard/settings",
+    href: "settings",
     roles: ["SYSTEM_ADMIN", "HR_MANAGER", "FINANCE_MANAGER"],
   },
   {
     id: "finance",
     label: "Finance",
-    href: "/dashboard/finance",
+    href: "finance",
     roles: ["FINANCE_MANAGER", "SYSTEM_ADMIN"],
   },
   {
     id: "hr",
     label: "HR",
-    href: "/dashboard/hr",
+    href: "hr",
     roles: ["HR_MANAGER", "SYSTEM_ADMIN"],
   },
   {
     id: "departments",
     label: "Departments",
-    href: "/dashboard/departments",
+    href: "departments",
     roles: ["DEPARTMENT_HEAD", "SYSTEM_ADMIN"],
   },
   {
