@@ -3,12 +3,12 @@
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import { Sidebar, SidebarBody, SidebarLink, useSidebar } from "@/app/components/ui/Sidebar";
-import { getNavItemsForRoles, ICONS_MAP } from "@/lib/navigation";
-import { cn } from "@/lib/utils";
+import { getNavItemsForRoles, ICONS_MAP } from "@/app/lib/navigation";
+import { cn } from "@/app/lib/utils";
 import Link from "next/link";
 import Image from "next/image";
-import { ThemeToggle } from "../../components/ui/ThemeToggle";
-import { Loader } from "../../components/ui/Loader";
+import { ThemeToggle } from "../components/ui/ThemeToggle";
+import { Loader } from "../components/ui/Loader";
 import { useEffect } from "react";
 
 export default function DashboardLayout({
@@ -21,7 +21,7 @@ export default function DashboardLayout({
 
     useEffect(() => {
         if (!isLoading && !user) {
-            router.push("/auth");
+            router.replace("/auth");
         }
     }, [user, isLoading, router]);
 
@@ -43,21 +43,19 @@ export default function DashboardLayout({
 
     return (
         <div className={cn(
-            "flex min-h-screen w-screen overflow-hidden bg-backgroundPrimary md:flex-row"
+            "flex h-screen w-full max-w-full flex-col overflow-hidden md:flex-row"
         )}>
             <Sidebar>
                 <SidebarContent user={user} links={links} />
             </Sidebar>
-            <div className="flex min-h-screen min-w-0 flex-1">
-                <div className="flex min-h-screen w-full min-w-0 flex-1 flex-col gap-2 bg-white p-2 md:p-10 dark:bg-neutral-900">
-                    {isLoading ? (
-                        <div className="flex min-h-full w-full items-center justify-center">
-                            <Loader />
-                        </div>
-                    ) : (
-                        children
-                    )}
-                </div>
+            <div className="flex h-full min-w-0 flex-1 flex-col overflow-hidden">
+                {isLoading ? (
+                    <div className="flex h-full w-full items-center justify-center">
+                        <Loader />
+                    </div>
+                ) : (
+                    children
+                )}
             </div>
         </div>
     );
@@ -78,7 +76,7 @@ const SidebarContent = ({ user, links }: SidebarContentProps) => {
     const { open } = useSidebar();
 
     return (
-        <SidebarBody className="h-screen justify-between gap-10">
+        <SidebarBody className="h-full justify-between gap-10">
             <div className="flex flex-1 flex-col overflow-x-hidden overflow-y-auto">
                 {open ? (
                     <Logo />
@@ -89,7 +87,7 @@ const SidebarContent = ({ user, links }: SidebarContentProps) => {
                 )}
                 <div className="mt-8 flex flex-col gap-2">
                     {links.map((link, idx) => (
-                        <SidebarLink key={idx} link={link} />
+                        <SidebarLink key={link.href} link={link} />
                     ))}
                 </div>
             </div>
@@ -119,7 +117,7 @@ const SidebarContent = ({ user, links }: SidebarContentProps) => {
 const Logo = () => {
     return (
         <div className="flex justify-between items-center gap-2">
-            <Link className="font-clash-display" href="/">
+            <Link className="font-clash-display" href="/dashboard">
                 <Image
                     src="/logo.svg"
                     alt="Shiftly"
@@ -127,7 +125,7 @@ const Logo = () => {
                     height={80}
                 />
             </Link>
-            <ThemeToggle  />
+            <ThemeToggle />
         </div>
     );
 };

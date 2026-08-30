@@ -1,4 +1,8 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
 @variant dark (&:where(.dark, .dark *));
 
 @theme {
@@ -8,7 +12,7 @@
   --color-backgroundSecondary: var(--background-secondary);
   --color-sidebar: var(--sidebar);
   --color-input: var(--input);
-  
+
   /* Text Colors */
   --color-textPrimary: var(--text-primary);
   --color-textSecondary: var(--text-secondary);
@@ -20,6 +24,7 @@
   --color-secondary: var(--secondary);
   --color-hover: var(--hover);
   --color-hoverPrimary: var(--hover-primary);
+  --color-hoverSecondary: var(--hover-secondary);
   --color-borderPrimary: var(--border-primary);
 
   /* Fonts */
@@ -63,7 +68,8 @@
   --secondary: #d4264f;
   --hover: #c80745;
 
-  --hover-primary: #ffffff;
+  --hover-primary: #f4f4f4;
+  --hover-secondary: #e1e1e1;
   --btn-hover-text: #f7f6ff;
 
   --border-primary: #e7ebf3;
@@ -85,14 +91,14 @@
 }
 
 .dark {
-  --background: #0b0b0d;
-  --foreground: #f5f5fa;
+  --background: oklch(17.764% 0.00002 271.152);
+  --foreground: oklch(0.985 0 0);
 
   --background-secondary: rgba(0, 0, 0, 1);
 
-  --sidebar: oklch(26.9% 0 0);
+  --sidebar: oklch(0.205 0 0);
 
-  --input: oklch(21% 0.006 285.885);
+  --input: oklch(1 0 0 / 15%);
 
   --text-primary: #f7f6ff;
   --text-secondary: #e2e8f0;
@@ -103,6 +109,7 @@
   --hover: #c80745;
 
   --hover-primary: #222125;
+  --hover-secondary: #222125;
   --btn-hover-text: #0a0a0a;
 
   --border-primary: #141218;

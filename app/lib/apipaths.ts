@@ -5,4 +5,11 @@ export const API_PATHS = {
     ME: "/auth/me",
     LOGOUT: "/auth/logout",
   },
+  USERS:{
+    GETALL:"/users",
+    USER_ASSIGNMENT:"/users/{id}/assignment",
+  },
+  DEPARTMENTS: {
+    GETALL: "/departments",
+  },
 };

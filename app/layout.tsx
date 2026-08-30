@@ -5,11 +5,11 @@ import "./globals.css";
 import { Toaster } from "@/app/components/ui/Sonner";
 import { AuthProvider } from "@/app/context/AuthContext";
 import ThemeProvider from "@/app/components/ui/ThemeProvider";
-import { cn } from "@/lib/utils";
+import { cn } from "@/app/lib/utils";
 
 const playfairDisplayHeading = Playfair_Display({subsets:['latin'],variable:'--font-heading'});
 
-const notoSans = Noto_Sans({subsets:['latin'],variable:'--font-sans'});
+const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,7 +34,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={cn("h-full", "antialiased", geistSans.variable, geistMono.variable, "font-sans", notoSans.variable, playfairDisplayHeading.variable)}
+      className={cn("h-full", "antialiased", geistSans.variable, geistMono.variable, "font-sans", geist.variable, playfairDisplayHeading.variable)}
       suppressHydrationWarning
     >
       <body>
