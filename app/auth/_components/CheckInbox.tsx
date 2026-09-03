@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { MailCheck, AlertCircle, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
-import { resendVerification } from '@/app/api/auth/verify';
+import { resendVerification } from '@/app/services/auth/verify';
 import { ERROR_CODES } from '@/app/lib/errorcodes';
 import type { ApiError } from '@/app/lib/axios';
 

@@ -11,7 +11,7 @@ import {
   Mail,
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { verifyEmail, resendVerification } from '@/app/api/auth/verify';
+import { verifyEmail, resendVerification } from '@/app/services/auth/verify';
 import { ERROR_CODES } from '@/app/lib/errorcodes';
 import type { ApiError } from '@/app/lib/axios';
 

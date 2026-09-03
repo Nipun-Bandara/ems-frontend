@@ -15,7 +15,7 @@ import {
   Loader2,
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { resetPassword } from '@/app/api/auth/password';
+import { resetPassword } from '@/app/services/auth/password';
 import { ERROR_CODES } from '@/app/lib/errorcodes';
 import type { ApiError } from '@/app/lib/axios';
 
