@@ -1,0 +1,75 @@
+name: Commitlint
+
+on:
+  pull_request:
+    types: [opened, edited, reopened, synchronize]
+
+concurrency:
+  group: commitlint-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  pr-title:
+    name: PR title
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      # Installed into a scratch directory rather than the app's package.json so
+      # the title check does not depend on the project's dependency tree.
+      # Keeping the config next to node_modules is what lets `extends` resolve.
+      - name: Install commitlint
+        run: |
+          mkdir -p "$RUNNER_TEMP/commitlint"
+          cd "$RUNNER_TEMP/commitlint"
+          npm init -y > /dev/null
+          npm install --no-fund --no-audit \
+            @commitlint/cli@19 \
+            @commitlint/config-conventional@19
+
+      - name: Write commitlint config
+        run: |
+          cat > "$RUNNER_TEMP/commitlint/commitlint.config.js" <<'EOF'
+          module.exports = {
+            extends: ['@commitlint/config-conventional'],
+            rules: {
+              'scope-empty': [2, 'never'],
+              'scope-enum': [
+                2,
+                'always',
+                ['auth', 'users', 'ui', 'build', 'ci'],
+              ],
+            },
+          };
+          EOF
+
+      - name: Lint PR title
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          cd "$RUNNER_TEMP/commitlint"
+          printf '%s\n' "$PR_TITLE" | npx commitlint --config commitlint.config.js
+
+      - name: Explain the format
+        if: failure()
+        run: |
+          cat >> "$GITHUB_STEP_SUMMARY" <<'EOF'
+          ### PR title must follow Conventional Commits
+
+          ```
+          <type>(<scope>): <subject>
+          ```
+
+          Allowed scopes: `auth`, `users`, `ui`, `build`, `ci`
+
+          Examples:
+
+          - `feat(users): add department column to the user table`
+          - `fix(auth): clear the token on a failed refresh`
+          - `chore(ci): cache the npm store`
+          EOF
