@@ -26,7 +26,13 @@ export type GetUsersParams = {
 };
 
 export async function getAllUsers(params: GetUsersParams): Promise<PaginatedUsersResponse> {
-    const res = await axios.post(API_PATHS.USERS.GETALL, params);
+    const res = await axios.get(API_PATHS.USERS.GETALL, {
+        params: {
+            assigned: params.assigned,
+            page: params.page,
+            limit: params.limit,
+        },
+    });
     return res.data as PaginatedUsersResponse;
 }
 
