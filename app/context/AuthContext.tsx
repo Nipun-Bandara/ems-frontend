@@ -17,7 +17,12 @@ interface AuthUser {
 interface AuthContextType {
   user: AuthUser | null;
   login: (credentials: LoginRequest) => Promise<void>;
-  register: (payload: RegisterPayload) => Promise<void>;
+  /**
+   * Creates the account and returns without signing anyone in — the address has to be
+   * verified first. Resolves with the address the verification link was sent to, so the
+   * caller can say which inbox to look in.
+   */
+  register: (payload: RegisterPayload) => Promise<{ email: string }>;
   logout: () => void;
   isLoading: boolean;
 }
@@ -72,15 +77,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     router.push("/dashboard");
   };
 
+  // No session and no redirect: registration returns no token, because the account cannot be
+  // signed in to until the verification link is clicked. The caller shows the inbox prompt.
   const register = async (payload: RegisterPayload) => {
     const data = await registerUser(payload);
-    if (data.isBanned) {
-      throw new Error("This account has been banned. Please contact support.");
-    }
-
-    localStorage.setItem("user", JSON.stringify(data));
-    setUser(mapSessionToUser(data));
-    router.push("/dashboard");
+    return { email: data.email };
   };
 
   const logout = () => {

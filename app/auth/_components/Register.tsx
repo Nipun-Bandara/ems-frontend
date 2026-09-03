@@ -13,6 +13,8 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/app/context/AuthContext";
 import { toast } from "sonner";
+import CheckInbox from "./CheckInbox";
+import type { ApiError } from "@/app/lib/axios";
 
 interface RegisterProps {
   onSwitchToLogin: () => void;
@@ -21,6 +23,9 @@ interface RegisterProps {
 export default function Register({ onSwitchToLogin }: RegisterProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
+  // Registration no longer signs anyone in, so this is where the flow ends: the account
+  // exists and the next move is in the user's inbox.
+  const [registeredEmail, setRegisteredEmail] = useState<string | null>(null);
   const {register} = useAuth();
 
   const formik = useFormik({
@@ -39,15 +44,27 @@ export default function Register({ onSwitchToLogin }: RegisterProps) {
     onSubmit: async (values) => {
       setServerError(null);
       try {
-        await register(values);
-        toast.success("Account created successfully!");
-      } catch (error: any) {
+        const { email } = await register(values);
+        toast.success("Account created. Check your email to verify it.");
+        setRegisteredEmail(email);
+      } catch (error) {
         setServerError(
-          error?.message || "An unexpected error occurred. Please try again."
+          (error as ApiError)?.message ||
+            "An unexpected error occurred. Please try again."
         );
       }
     },
   });
+
+  if (registeredEmail) {
+    return (
+      <CheckInbox
+        email={registeredEmail}
+        reason="registered"
+        onBack={onSwitchToLogin}
+      />
+    );
+  }
 
   return (
     <div className="w-full max-w-md space-y-8">

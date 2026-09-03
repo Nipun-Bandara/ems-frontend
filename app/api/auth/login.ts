@@ -22,8 +22,13 @@ export interface AuthApiResponse {
   username: string;
   roles: string[];
   isBanned: boolean;
+  emailVerified: boolean;
 }
 
+/**
+ * Rejects with an ApiError carrying EMAIL_NOT_VERIFIED when the password was right but the
+ * address has not been confirmed — the one 403 worth offering a resend link for.
+ */
 export async function loginUser(payload: LoginRequest) {
   const { data } = await axiosInstance.post<AuthApiResponse>(
     API_PATHS.AUTH.LOGIN,
