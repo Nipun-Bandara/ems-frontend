@@ -4,6 +4,12 @@ export interface ApiError {
   status: number;
   error: string;
   message: string;
+  /**
+   * Stable identifier for the specific failure, present only on the ones a caller has to
+   * tell apart from others sharing their status — see ERROR_CODES in ./errorcodes. Branch on
+   * this, never on `message`.
+   */
+  code?: string;
 }
 
 const axiosInstance = axios.create({
@@ -32,6 +38,7 @@ axiosInstance.interceptors.response.use(
       status: payload.status ?? error?.response?.status ?? 500,
       error: payload.error ?? "Request failed",
       message: payload.message ?? "Something went wrong",
+      code: payload.code,
     };
 
     return Promise.reject(normalizedError);

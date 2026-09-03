@@ -4,6 +4,8 @@ export const API_PATHS = {
     REGISTER: "/auth/register",
     ME: "/auth/me",
     LOGOUT: "/auth/logout",
+    VERIFY: "/auth/verify",
+    RESEND_VERIFICATION: "/auth/resend-verification",
   },
   USERS:{
     GETALL:"/users",

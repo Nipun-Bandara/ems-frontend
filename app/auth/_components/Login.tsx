@@ -7,6 +7,9 @@ import { Mail, Lock, Eye as EyeIcon, EyeOff, AlertCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/app/context/AuthContext';
 import { toast } from 'sonner';
+import CheckInbox from './CheckInbox';
+import { ERROR_CODES } from '@/app/lib/errorcodes';
+import type { ApiError } from '@/app/lib/axios';
 
 interface LoginProps {
   onSwitchToSignup: () => void;
@@ -15,6 +18,8 @@ interface LoginProps {
 export default function Login({ onSwitchToSignup }: LoginProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
+  // Set only when the backend says the password was right but the address is unverified.
+  const [unverifiedEmail, setUnverifiedEmail] = useState<string | null>(null);
   const router = useRouter();
 
   const {login} = useAuth();
@@ -33,11 +38,31 @@ export default function Login({ onSwitchToSignup }: LoginProps) {
       try {
         await login(values);
         toast.success('Logged in successfully!');
-      } catch (error: any) {
-        setServerError(error?.message || 'An unexpected error occurred. Please try again.');
+      } catch (error) {
+        const apiError = error as ApiError;
+        // Branch on the code, not the message: this 403 and an "account banned" 403 are the
+        // same status, and only one of them is fixed by clicking a link in an email.
+        if (apiError?.code === ERROR_CODES.EMAIL_NOT_VERIFIED) {
+          setUnverifiedEmail(values.email);
+          return;
+        }
+        setServerError(
+          (error as Error)?.message ||
+            'An unexpected error occurred. Please try again.'
+        );
       }
     },
   });
+
+  if (unverifiedEmail) {
+    return (
+      <CheckInbox
+        email={unverifiedEmail}
+        reason="login-blocked"
+        onBack={() => setUnverifiedEmail(null)}
+      />
+    );
+  }
 
   return (
     <div className="w-full max-w-md space-y-8">
