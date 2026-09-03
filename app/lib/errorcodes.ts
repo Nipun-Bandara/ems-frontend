@@ -14,4 +14,10 @@ export const ERROR_CODES = {
   VERIFICATION_TOKEN_EXPIRED: "VERIFICATION_TOKEN_EXPIRED",
   /** A verification email went out less than a minute ago. */
   RESEND_TOO_SOON: "RESEND_TOO_SOON",
+  /** The password reset link is not one we issued. */
+  PASSWORD_RESET_TOKEN_INVALID: "PASSWORD_RESET_TOKEN_INVALID",
+  /** The password reset link was real but is more than an hour old. */
+  PASSWORD_RESET_TOKEN_EXPIRED: "PASSWORD_RESET_TOKEN_EXPIRED",
+  /** The password reset link was already spent, or replaced by a newer request. */
+  PASSWORD_RESET_TOKEN_USED: "PASSWORD_RESET_TOKEN_USED",
 } as const;
