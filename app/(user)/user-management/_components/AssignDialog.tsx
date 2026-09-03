@@ -3,8 +3,8 @@
 import {useEffect, useState} from "react";
 import {Button} from "@/app/components/ui/Button";
 import Loader from "@/app/components/ui/Loader";
-import {getAllDepartments} from "@/app/api/user-management/department";
-import {assignUser, UserResponse} from "@/app/api/user-management/users";
+import {getAllDepartments} from "@/app/services/user-management/department";
+import {assignUser, UserResponse} from "@/app/services/user-management/users";
 import {useAuth} from "@/app/context/AuthContext";
 import type {Role} from "@/app/lib/navigation";
 

@@ -5,7 +5,7 @@ import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import Link from 'next/link';
 import { Mail, AlertCircle, Loader2, MailCheck } from 'lucide-react';
-import { requestPasswordReset } from '@/app/api/auth/password';
+import { requestPasswordReset } from '@/app/services/auth/password';
 import type { ApiError } from '@/app/lib/axios';
 
 /**

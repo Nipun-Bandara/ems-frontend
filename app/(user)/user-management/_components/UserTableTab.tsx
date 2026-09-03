@@ -2,7 +2,7 @@
 
 import {useEffect, useState, useMemo} from "react";
 import {GridColDef} from "@mui/x-data-grid";
-import {getAllUsers, UserResponse} from "@/app/api/user-management/users";
+import {getAllUsers, UserResponse} from "@/app/services/user-management/users";
 import {mapRolesToString} from "@/app/helpers/rolemapping";
 import AssignDialog from "@/app/(user)/user-management/_components/AssignDialog";
 import Loader from "@/app/components/ui/Loader";
