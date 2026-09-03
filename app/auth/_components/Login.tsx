@@ -151,7 +151,7 @@ export default function Login({ onSwitchToSignup }: LoginProps) {
           </label>
           <button
             type="button"
-            onClick={() => router.push('/forgot-password')}
+            onClick={() => router.push('/auth/forgot')}
             className="font-medium text-primary hover:text-primary/80 transition-colors"
           >
              Forgot password?

@@ -6,6 +6,8 @@ export const API_PATHS = {
     LOGOUT: "/auth/logout",
     VERIFY: "/auth/verify",
     RESEND_VERIFICATION: "/auth/resend-verification",
+    FORGOT_PASSWORD: "/auth/forgot-password",
+    RESET_PASSWORD: "/auth/reset-password",
   },
   USERS:{
     GETALL:"/users",
