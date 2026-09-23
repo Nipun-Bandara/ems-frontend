@@ -16,4 +16,8 @@ export const API_PATHS = {
   DEPARTMENTS: {
     GETALL: "/departments",
   },
+  DESIGNATIONS: {
+    BASE: "/designations",
+    BY_ID: "/designations/{id}",
+  },
 };
