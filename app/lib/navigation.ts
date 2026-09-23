@@ -51,6 +51,12 @@ export const NAV_ITEMS: NavItem[] = [
     roles: ["DEPARTMENT_HEAD", "SYSTEM_ADMIN"],
   },
   {
+    id: "designation-management",
+    label: "Designations",
+    href: "/designation-management",
+    roles: ["SYSTEM_ADMIN", "DEPARTMENT_HEAD"],
+  },
+  {
     id: "logout",
     label: "Logout",
     href: "/auth",
@@ -69,7 +75,7 @@ export function getNavItemsForRoles(userRoles: Role[] | string[]): NavItem[] {
 
 export default NAV_ITEMS;
 
-import { Home, User, Settings, DollarSign, Users, Layers, LogOut } from "lucide-react";
+import { Home, User, Settings, DollarSign, Users, Layers, LogOut, BriefcaseBusiness } from "lucide-react";
 import type { ComponentType, SVGProps } from "react";
 
 export const ICONS_MAP: Record<string, ComponentType<SVGProps<SVGSVGElement>>> = {
@@ -80,5 +86,6 @@ export const ICONS_MAP: Record<string, ComponentType<SVGProps<SVGSVGElement>>> =
   finance: DollarSign,
   hr: Users,
   departments: Layers,
+  "designation-management": BriefcaseBusiness,
   logout: LogOut,
 };
