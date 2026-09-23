@@ -1,50 +1,62 @@
 "use client";
 
-import {useEffect, useState} from "react";
+import {useState} from "react";
+import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
+
 import {Button} from "@/app/components/ui/Button";
 import Loader from "@/app/components/ui/Loader";
 import {getAllDepartments} from "@/app/services/user-management/department";
-import {assignUser, UserResponse} from "@/app/services/user-management/users";
+import {assignUser} from "@/app/services/user-management/users";
 import {useAuth} from "@/app/context/AuthContext";
 import type {Role} from "@/app/lib/navigation";
+import type {ApiError} from "@/app/lib/axios";
 
 type Props = {
     user: { userId: number; username: string } | null;
     open: boolean;
     onClose: () => void;
-    onAssigned?: () => void;
 };
 
 
 const ROLE_OPTIONS: Role[] = ["DEPARTMENT_HEAD", "HR_MANAGER", "FINANCE_MANAGER", "EMPLOYEE", "USER"];
 
-export default function AssignDialog({user, open, onClose, onAssigned}: Props) {
+export default function AssignDialog({user, open, onClose}: Props) {
     const {user: currentUser} = useAuth();
-    const [departments, setDepartments] = useState<Array<{ id: number; name: string }>>([]);
+    const queryClient = useQueryClient();
     const [role, setRole] = useState<string>("");
     const [departmentId, setDepartmentId] = useState<number | null>(null);
-    const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
-        if (!open) return;
+    const closeDialog = () => {
         setRole("");
         setDepartmentId(null);
         setError(null);
+        onClose();
+    };
 
-        (async () => {
-            try {
-                const data = await getAllDepartments();
-                const mapped = (data || []).map((d) => ({
-                    id: (d.departmentId ?? d.id) as number,
-                    name: (d.departmentName ?? d.name) as string,
-                }));
-                setDepartments(mapped);
-            } catch (e) {
-                setDepartments([]);
-            }
-        })();
-    }, [open]);
+    const {data: departments = []} = useQuery({
+        queryKey: ["departments"],
+        queryFn: async () => {
+            const data = await getAllDepartments();
+            return (data || []).map((d) => ({
+                id: (d.departmentId ?? d.id) as number,
+                name: (d.departmentName ?? d.name) as string,
+            }));
+        },
+        enabled: open,
+    });
+
+    const assignMutation = useMutation({
+        mutationFn: (variables: { userId: number; payload: { role?: string; departmentId?: number | null } }) =>
+            assignUser(variables.userId, variables.payload),
+        onSuccess: async () => {
+            await queryClient.invalidateQueries({queryKey: ["users"]});
+            closeDialog();
+        },
+        onError: (err: ApiError) => {
+            setError(err?.message ?? "Failed to assign user");
+        },
+    });
 
     if (!open || !user) return null;
 
@@ -53,22 +65,15 @@ export default function AssignDialog({user, open, onClose, onAssigned}: Props) {
     const canAssignRole = userRoles.some((r) => r === "SYSTEM_ADMIN" || r === "DEPARTMENT_HEAD");
     const isDepartmentHead = userRoles.includes("DEPARTMENT_HEAD");
 
-    const submit = async () => {
-        setLoading(true);
-        setError(null);
-        try {
-            const payload: { role?: string; departmentId?: number | null } = {};
-            if (canAssignRole && role) payload.role = role;
-            if (canAssignDepartment) payload.departmentId = departmentId ?? null;
+    const loading = assignMutation.isPending;
 
-            await assignUser(user.userId, payload);
-            onAssigned?.();
-            onClose();
-        } catch (err: any) {
-            setError(err?.message ?? "Failed to assign user");
-        } finally {
-            setLoading(false);
-        }
+    const submit = () => {
+        setError(null);
+        const payload: { role?: string; departmentId?: number | null } = {};
+        if (canAssignRole && role) payload.role = role;
+        if (canAssignDepartment) payload.departmentId = departmentId ?? null;
+
+        assignMutation.mutate({userId: user.userId, payload});
     };
 
     const visibleRoleOptions = ROLE_OPTIONS.filter((r) => {
@@ -123,7 +128,7 @@ export default function AssignDialog({user, open, onClose, onAssigned}: Props) {
                 {error && <div className="mb-3 text-sm text-red-600">{error}</div>}
 
                 <div className="flex justify-end gap-2">
-                    <Button onClick={onClose} disabled={loading}>
+                    <Button onClick={closeDialog} disabled={loading}>
                         Cancel
                     </Button>
                     <Button onClick={submit} disabled={loading || (!canAssignRole && !canAssignDepartment)}>

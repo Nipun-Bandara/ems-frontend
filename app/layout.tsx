@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Noto_Sans, Playfair_Display } from "next/font/google";
+import { Geist, Geist_Mono, Playfair_Display } from "next/font/google";
 
 import "./globals.css";
 import { Toaster } from "@/app/components/ui/Sonner";
 import { AuthProvider } from "@/app/context/AuthContext";
+import QueryProvider from "@/app/components/providers/QueryProvider";
 import ThemeProvider from "@/app/components/ui/ThemeProvider";
 import { cn } from "@/app/lib/utils";
 
@@ -45,7 +46,9 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <Toaster />
-          <AuthProvider>{children}</AuthProvider>
+          <QueryProvider>
+            <AuthProvider>{children}</AuthProvider>
+          </QueryProvider>
         </ThemeProvider>
       </body>
     </html>
