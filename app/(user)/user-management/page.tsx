@@ -2,67 +2,70 @@
 
 import {useMemo, useState} from "react";
 import {Users, UserCheck} from "lucide-react";
-import {GridColDef} from "@mui/x-data-grid";
+import type {ColumnDef} from "@tanstack/react-table";
 
-import UserTableTab from "./_components/UserTableTab";
+import UserTableTab, {type UserRow} from "./_components/UserTableTab";
 import {Tabs, TabsList, TabsTrigger, TabsContent} from "@/app/components/ui/Tabs";
 
 type TabKey = "all" | "unassigned";
 
-type ColumnWithVisibility = GridColDef & {
+type ColumnWithVisibility = ColumnDef<UserRow> & {
     show?: boolean;
     visibleIn: TabKey[];
 };
 
 const userManagementColumns: ColumnWithVisibility[] = [
-    {field: "username", headerName: "Username", flex: 1, minWidth: 100, show: true, visibleIn: ["all", "unassigned"]},
-    {field: "email", headerName: "Email", flex: 1, minWidth: 150, show: true, visibleIn: ["all", "unassigned"]},
-    {field: "departmentName", headerName: "Department", flex: 1, minWidth: 160, show: true, visibleIn: ["all"]},
+    {accessorKey: "username", header: "Username", minSize: 100, show: true, visibleIn: ["all", "unassigned"]},
+    {accessorKey: "email", header: "Email", minSize: 150, show: true, visibleIn: ["all", "unassigned"]},
+    {accessorKey: "departmentName", header: "Department", minSize: 160, show: true, visibleIn: ["all"]},
     {
-        field: "isAssigned",
-        headerName: "Assigned",
-        flex: 0.6,
-        minWidth: 120,
+        accessorKey: "isAssigned",
+        header: "Assigned",
+        minSize: 120,
         show: true,
         visibleIn: ["all"],
-        renderCell: (params) => (
-            <span
-                className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${params.value ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-700"
-                }`}
-            >
-				{params.value ? "Yes" : "No"}
+        cell: ({getValue}) => {
+            const value = getValue<boolean | null | undefined>();
+            return (
+                <span
+                    className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${value ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-700"
+                    }`}
+                >
+				{value ? "Yes" : "No"}
 			</span>
-        ),
+            );
+        },
     },
-    {field: "roles", headerName: "Roles", flex: 1, minWidth: 160, show: true, visibleIn: ["all"]},
+    {accessorKey: "roles", header: "Roles", minSize: 160, show: true, visibleIn: ["all"]},
     {
-        field: "isBanned",
-        headerName: "Banned",
-        flex: 0.6,
-        minWidth: 100,
+        accessorKey: "isBanned",
+        header: "Banned",
+        minSize: 100,
         show: true,
         visibleIn: ["all"],
-        renderCell: (params) => (
-            <span className={params.value ? "text-red-600" : ""}>
-				{params.value ? "Yes" : "No"}
+        cell: ({getValue}) => {
+            const value = getValue<boolean | null | undefined>();
+            return (
+                <span className={value ? "text-red-600" : ""}>
+				{value ? "Yes" : "No"}
 			</span>
-        ),
+            );
+        },
     },
     {
-        field: "requestedRole",
-        headerName: "Requested Role",
-        flex: 1,
-        minWidth: 160,
+        accessorKey: "requestedRole",
+        header: "Requested Role",
+        minSize: 160,
         show: true,
         visibleIn: ["unassigned"]
     },
-    {field: "joinedOn", headerName: "Joined On", flex: 1, minWidth: 140, show: true, visibleIn: ["unassigned"]},
+    {accessorKey: "joinedOn", header: "Joined On", minSize: 140, show: true, visibleIn: ["unassigned"]},
 ];
 
-const getColumnsForTab = (tab: TabKey): GridColDef[] =>
+const getColumnsForTab = (tab: TabKey): ColumnDef<UserRow>[] =>
     userManagementColumns
         .filter((column) => column.show !== false && column.visibleIn.includes(tab))
-        .map(({show, visibleIn, ...column}) => column);
+        .map((column) => column);
 
 export default function UserManagementPage() {
     const [activeTab, setActiveTab] = useState<TabKey>("all");
@@ -105,4 +108,3 @@ export default function UserManagementPage() {
         </div>
     );
 }
-

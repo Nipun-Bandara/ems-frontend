@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { useFormik } from "formik";
-import * as Yup from "yup";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 import {
   Mail,
   Lock,
@@ -20,6 +21,14 @@ interface RegisterProps {
   onSwitchToLogin: () => void;
 }
 
+const registerSchema = z.object({
+  email: z.email("Invalid email address"),
+  username: z.string().min(1, "Required"),
+  password: z.string().min(4, "Must be at least 4 characters"),
+});
+
+type RegisterValues = z.infer<typeof registerSchema>;
+
 export default function Register({ onSwitchToLogin }: RegisterProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
@@ -28,33 +37,32 @@ export default function Register({ onSwitchToLogin }: RegisterProps) {
   const [registeredEmail, setRegisteredEmail] = useState<string | null>(null);
   const {register} = useAuth();
 
-  const formik = useFormik({
-    initialValues: {
+  const {
+    register: registerField,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<RegisterValues>({
+    resolver: zodResolver(registerSchema),
+    defaultValues: {
       email: "",
       username: "",
       password: "",
     },
-    validationSchema: Yup.object({
-      email: Yup.string().email("Invalid email address").required("Required"),
-      username: Yup.string().required("Required"),
-      password: Yup.string()
-        .min(4, "Must be at least 4 characters")
-        .required("Required"),
-    }),
-    onSubmit: async (values) => {
-      setServerError(null);
-      try {
-        const { email } = await register(values);
-        toast.success("Account created. Check your email to verify it.");
-        setRegisteredEmail(email);
-      } catch (error) {
-        setServerError(
-          (error as ApiError)?.message ||
-            "An unexpected error occurred. Please try again."
-        );
-      }
-    },
   });
+
+  const onSubmit = async (values: RegisterValues) => {
+    setServerError(null);
+    try {
+      const { email } = await register(values);
+      toast.success("Account created. Check your email to verify it.");
+      setRegisteredEmail(email);
+    } catch (error) {
+      setServerError(
+        (error as ApiError)?.message ||
+          "An unexpected error occurred. Please try again."
+      );
+    }
+  };
 
   if (registeredEmail) {
     return (
@@ -77,7 +85,7 @@ export default function Register({ onSwitchToLogin }: RegisterProps) {
         </p>
       </div>
 
-      <form onSubmit={formik.handleSubmit} className="mt-8 space-y-5">
+      <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-5">
         {serverError && (
           <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center gap-3 text-red-500 text-sm">
             <AlertCircle className="h-5 w-5 flex-shrink-0" />
@@ -95,18 +103,18 @@ export default function Register({ onSwitchToLogin }: RegisterProps) {
               </div>
               <input
                 type="email"
-                {...formik.getFieldProps("email")}
+                {...registerField("email")}
                 className={`block w-full pl-10 pr-3 py-3 border rounded-xl bg-backgroundSecondary text-textPrimary placeholder-textSecondary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all ${
-                  formik.touched.email && formik.errors.email
+                  errors.email
                     ? "border-red-500"
                     : "border-borderPrimary"
                 }`}
                 placeholder="you@example.com"
               />
             </div>
-            {formik.touched.email && formik.errors.email ? (
+            {errors.email ? (
               <div className="text-red-500 text-xs mt-1">
-                {formik.errors.email}
+                {errors.email.message}
               </div>
             ) : null}
           </div>
@@ -121,18 +129,18 @@ export default function Register({ onSwitchToLogin }: RegisterProps) {
               </div>
               <input
                 type="text"
-                {...formik.getFieldProps("username")}
+                {...registerField("username")}
                 className={`block w-full pl-10 pr-3 py-3 border rounded-xl bg-backgroundSecondary text-textPrimary placeholder-textSecondary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all ${
-                  formik.touched.username && formik.errors.username
+                  errors.username
                     ? "border-red-500"
                     : "border-borderPrimary"
                 }`}
                 placeholder="Enter username"
               />
             </div>
-            {formik.touched.username && formik.errors.username ? (
+            {errors.username ? (
               <div className="text-red-500 text-xs mt-1">
-                {formik.errors.username}
+                {errors.username.message}
               </div>
             ) : null}
           </div>
@@ -146,9 +154,9 @@ export default function Register({ onSwitchToLogin }: RegisterProps) {
               </div>
               <input
                 type={showPassword ? "text" : "password"}
-                {...formik.getFieldProps("password")}
+                {...registerField("password")}
                 className={`block w-full pl-10 pr-12 py-3 border rounded-xl bg-backgroundSecondary text-textPrimary placeholder-textSecondary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all ${
-                  formik.touched.password && formik.errors.password
+                  errors.password
                     ? "border-red-500"
                     : "border-borderPrimary"
                 }`}
@@ -167,9 +175,9 @@ export default function Register({ onSwitchToLogin }: RegisterProps) {
                 )}
               </button>
             </div>
-            {formik.touched.password && formik.errors.password ? (
+            {errors.password ? (
               <div className="text-red-500 text-xs mt-1">
-                {formik.errors.password}
+                {errors.password.message}
               </div>
             ) : null}
           </div>
@@ -177,10 +185,10 @@ export default function Register({ onSwitchToLogin }: RegisterProps) {
 
         <button
           type="submit"
-          disabled={formik.isSubmitting}
+          disabled={isSubmitting}
           className="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl text-sm font-semibold text-white bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {formik.isSubmitting ? "Creating Account..." : "Register"}
+          {isSubmitting ? "Creating Account..." : "Register"}
         </button>
 
         <div className="text-center mt-4">

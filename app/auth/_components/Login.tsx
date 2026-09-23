@@ -1,8 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { useFormik } from 'formik';
-import * as Yup from 'yup';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
 import { Mail, Lock, Eye as EyeIcon, EyeOff, AlertCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/app/context/AuthContext';
@@ -15,6 +16,13 @@ interface LoginProps {
   onSwitchToSignup: () => void;
 }
 
+const loginSchema = z.object({
+  email: z.email('Invalid email address'),
+  password: z.string().min(1, 'Required'),
+});
+
+type LoginValues = z.infer<typeof loginSchema>;
+
 export default function Login({ onSwitchToSignup }: LoginProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
@@ -24,35 +32,35 @@ export default function Login({ onSwitchToSignup }: LoginProps) {
 
   const {login} = useAuth();
 
-  const formik = useFormik({
-    initialValues: {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<LoginValues>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
       email: '',
       password: '',
     },
-    validationSchema: Yup.object({
-      email: Yup.string().email('Invalid email address').required('Required'),
-      password: Yup.string().required('Required'),
-    }),
-    onSubmit: async (values) => {
-      setServerError(null);
-      try {
-        await login(values);
-        toast.success('Logged in successfully!');
-      } catch (error) {
-        const apiError = error as ApiError;
-        // Branch on the code, not the message: this 403 and an "account banned" 403 are the
-        // same status, and only one of them is fixed by clicking a link in an email.
-        if (apiError?.code === ERROR_CODES.EMAIL_NOT_VERIFIED) {
-          setUnverifiedEmail(values.email);
-          return;
-        }
-        setServerError(
-          (error as Error)?.message ||
-            'An unexpected error occurred. Please try again.'
-        );
-      }
-    },
   });
+
+  const onSubmit = async (values: LoginValues) => {
+    setServerError(null);
+    try {
+      await login(values);
+      toast.success('Logged in successfully!');
+    } catch (error) {
+      const apiError = error as ApiError;
+      if (apiError?.code === ERROR_CODES.EMAIL_NOT_VERIFIED) {
+        setUnverifiedEmail(values.email);
+        return;
+      }
+      setServerError(
+        (error as Error)?.message ||
+          'An unexpected error occurred. Please try again.'
+      );
+    }
+  };
 
   if (unverifiedEmail) {
     return (
@@ -76,7 +84,7 @@ export default function Login({ onSwitchToSignup }: LoginProps) {
         </p>
       </div>
 
-      <form onSubmit={formik.handleSubmit} className="mt-8 space-y-5">
+      <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-5">
         {serverError && (
           <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center gap-3 text-red-500 text-sm">
             <AlertCircle className="h-5 w-5 flex-shrink-0" />
@@ -94,16 +102,16 @@ export default function Login({ onSwitchToSignup }: LoginProps) {
               </div>
               <input
                 type="email"
-                {...formik.getFieldProps('email')}
-                className={`block w-full pl-10 pr-3 py-3 border rounded-xl bg-backgroundSecondary text-textPrimary placeholder-textSecondary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all ${formik.touched.email && formik.errors.email
+                {...register('email')}
+                className={`block w-full pl-10 pr-3 py-3 border rounded-xl bg-backgroundSecondary text-textPrimary placeholder-textSecondary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all ${errors.email
                   ? 'border-red-500'
                   : 'border-borderPrimary'
                   }`}
                 placeholder="Enter your email"
               />
             </div>
-            {formik.touched.email && formik.errors.email ? (
-              <div className="text-red-500 text-xs mt-1">{formik.errors.email}</div>
+            {errors.email ? (
+              <div className="text-red-500 text-xs mt-1">{errors.email.message}</div>
             ) : null}
           </div>
 
@@ -117,8 +125,8 @@ export default function Login({ onSwitchToSignup }: LoginProps) {
               </div>
               <input
                 type={showPassword ? 'text' : 'password'}
-                {...formik.getFieldProps('password')}
-                className={`block w-full pl-10 pr-12 py-3 border rounded-xl bg-backgroundSecondary text-textPrimary placeholder-textSecondary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all ${formik.touched.password && formik.errors.password
+                {...register('password')}
+                className={`block w-full pl-10 pr-12 py-3 border rounded-xl bg-backgroundSecondary text-textPrimary placeholder-textSecondary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all ${errors.password
                   ? 'border-red-500'
                   : 'border-borderPrimary'
                   }`}
@@ -133,8 +141,8 @@ export default function Login({ onSwitchToSignup }: LoginProps) {
                 {showPassword ? <EyeOff className="h-5 w-5" /> : <EyeIcon className="h-5 w-5" />}
               </button>
             </div>
-            {formik.touched.password && formik.errors.password ? (
-              <div className="text-red-500 text-xs mt-1">{formik.errors.password}</div>
+            {errors.password ? (
+              <div className="text-red-500 text-xs mt-1">{errors.password.message}</div>
             ) : null}
           </div>
         </div>
@@ -160,10 +168,10 @@ export default function Login({ onSwitchToSignup }: LoginProps) {
 
         <button
           type="submit"
-          disabled={formik.isSubmitting}
+          disabled={isSubmitting}
           className="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl text-sm font-semibold text-white bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {formik.isSubmitting ? 'Signing in...' : 'Sign in'}
+          {isSubmitting ? 'Signing in...' : 'Sign in'}
         </button>
 
         <div className="text-center text-sm text-textSecondary">
