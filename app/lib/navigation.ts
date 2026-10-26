@@ -57,6 +57,18 @@ export const NAV_ITEMS: NavItem[] = [
     roles: ["SYSTEM_ADMIN", "DEPARTMENT_HEAD"],
   },
   {
+    id: "project",
+    label: "My Projects",
+    href: "/project",
+    roles: ["SYSTEM_ADMIN", "HR_MANAGER", "FINANCE_MANAGER", "DEPARTMENT_HEAD", "EMPLOYEE", "USER"],
+  },
+  {
+    id: "project-management",
+    label: "Project Management",
+    href: "/project-management",
+    roles: ["SYSTEM_ADMIN", "DEPARTMENT_HEAD"],
+  },
+  {
     id: "logout",
     label: "Logout",
     href: "/auth",
@@ -87,5 +99,7 @@ export const ICONS_MAP: Record<string, ComponentType<SVGProps<SVGSVGElement>>> =
   hr: Users,
   departments: Layers,
   "designation-management": BriefcaseBusiness,
+  project: BriefcaseBusiness,
+  "project-management": BriefcaseBusiness,
   logout: LogOut,
 };
