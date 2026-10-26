@@ -57,6 +57,12 @@ export const NAV_ITEMS: NavItem[] = [
     roles: ["SYSTEM_ADMIN", "DEPARTMENT_HEAD"],
   },
   {
+    id: "organization",
+    label: "Organization",
+    href: "/organization",
+    roles: ["SYSTEM_ADMIN", "HR_MANAGER", "FINANCE_MANAGER", "DEPARTMENT_HEAD", "EMPLOYEE", "USER"],
+  },
+  {
     id: "logout",
     label: "Logout",
     href: "/auth",
@@ -80,6 +86,7 @@ import type { ComponentType, SVGProps } from "react";
 
 export const ICONS_MAP: Record<string, ComponentType<SVGProps<SVGSVGElement>>> = {
   dashboard: Home,
+  organization: Users,
   "user-management": Users,
   profile: User,
   settings: Settings,
