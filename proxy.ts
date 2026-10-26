@@ -38,5 +38,6 @@ export function proxy(request: NextRequest) {
  * what matches here. Matcher values must be static literals to be analysable at build time.
  */
 export const config = {
+  matcher: ["/dashboard/:path*", "/profile/:path*", "/user-management/:path*", "/project/:path*", "/project-management/:path*"],
   matcher: ["/organization/:path*", "/dashboard/:path*", "/profile/:path*", "/user-management/:path*"],
 };
