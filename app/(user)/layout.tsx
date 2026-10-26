@@ -10,6 +10,8 @@ import Image from "next/image";
 import { ThemeToggle } from "../components/ui/ThemeToggle";
 import { Loader } from "../components/ui/Loader";
 import { useEffect } from "react";
+import { useEmployeeProfile } from "@/app/hooks/useEmployeeProfile";
+import { UserRound } from "lucide-react";
 
 export default function DashboardLayout({
     children,
@@ -68,12 +70,13 @@ interface Link {
 }
 
 interface SidebarContentProps {
-    user: any;
+    user: ReturnType<typeof useAuth>["user"];
     links: Link[];
 }
 
 const SidebarContent = ({ user, links }: SidebarContentProps) => {
     const { open } = useSidebar();
+    const { data: profile } = useEmployeeProfile(user?.id);
 
     return (
         <SidebarBody className="h-full justify-between gap-10">
@@ -86,7 +89,7 @@ const SidebarContent = ({ user, links }: SidebarContentProps) => {
                     </div>
                 )}
                 <div className="mt-8 flex flex-col gap-2">
-                    {links.map((link, idx) => (
+                    {links.map((link) => (
                         <SidebarLink key={link.href} link={link} />
                     ))}
                 </div>
@@ -95,16 +98,13 @@ const SidebarContent = ({ user, links }: SidebarContentProps) => {
                 {user && (
                     <SidebarLink
                         link={{
-                            label: user.name || "User",
-                            href: "/dashboard/profile",
+                            label: user.username || "User",
+                            href: "/profile",
                             icon: (
-                                <img
-                                    src={user.avatar || "https://assets.aceternity.com/manu.png"}
-                                    className="h-7 w-7 shrink-0 rounded-full"
-                                    width={50}
-                                    height={50}
-                                    alt="Avatar"
-                                />
+                                profile?.avatarUrl ? (
+                                    // eslint-disable-next-line @next/next/no-img-element
+                                    <img src={profile.avatarUrl} className="h-7 w-7 shrink-0 rounded-full object-cover" width={28} height={28} alt="Your profile photo" />
+                                ) : <UserRound className="h-7 w-7 shrink-0" aria-label="No profile photo" />
                             ),
                         }}
                     />
