@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import LeaveRequests from "./requests";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -47,7 +48,7 @@ export default function LeaveManagementPage() {
   const { admin, types, mine, entitlements, calendar } = useLeaves(year, employeeId);
   const yearValid = /^\d{4}$/.test(yearInput) && Number(yearInput) >= 1900 && Number(yearInput) <= 9999;
   return <main className="h-full overflow-y-auto bg-background p-5 text-textPrimary sm:p-8 space-y-6">
-    <header><h1 className="text-2xl font-semibold">Leave management</h1><p className="mt-1 text-textSecondary">Annual entitlements and balances, in days.</p></header>
+    <header><h1 className="text-2xl font-semibold">Leave management</h1><p className="mt-1 text-textSecondary">Requests, annual entitlements and balances, in days.</p></header>
     <label className="block max-w-40">Year<input aria-label="Year" className={fieldClass} type="number" min="1900" max="9999" value={yearInput} onChange={e => {
       setYearInput(e.target.value);
       setSelected(undefined);
@@ -61,6 +62,7 @@ export default function LeaveManagementPage() {
     <section className={boxClass} aria-labelledby="my-balances"><h2 id="my-balances" className="text-lg font-semibold">My balances</h2>
       {mine.isPending ? <p role="status">Loading balances…</p> : mine.isError ? <><ErrorMessage error={mine.error} /><Button onClick={() => mine.refetch()}>Retry balances</Button></> : <Balances rows={mine.data} />}
     </section>
+    <LeaveRequests />
     {admin && <ErrorMessage error={types.error} />}
     {admin ? <>
       <section className={boxClass} aria-labelledby="leave-types"><div className="flex flex-wrap items-center justify-between gap-3"><h2 id="leave-types" className="text-lg font-semibold">Leave types</h2><Button onClick={() => setEditingType(null)}>New leave type</Button></div>

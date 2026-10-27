@@ -20,3 +20,18 @@ export const leaveApi = {
   entries: async (id: string) => (await api.get<Entry[]>(`/leaves/entitlements/${id}/entries`)).data,
   calendar: async () => (await api.get<components["schemas"]["Calendar"]>("/leaves/calendar")).data,
 };
+
+export type LeaveRequest = components["schemas"]["LeaveRequest"];
+export type RequestInput = components["schemas"]["RequestInput"];
+export type EstimateInput = components["schemas"]["EstimateInput"];
+export type RequestAction = components["schemas"]["RequestAction"];
+export const requestApi = {
+  estimate: async (input: EstimateInput) => (await api.post<components["schemas"]["Estimate"]>("/leaves/requests/estimate", input)).data,
+  submit: async (input: RequestInput) => (await api.post<LeaveRequest>("/leaves/requests", input)).data,
+  mine: async () => (await api.get<LeaveRequest[]>("/leaves/requests/me")).data,
+  inbox: async () => (await api.get<LeaveRequest[]>("/leaves/requests/inbox")).data,
+  detail: async (id: string) => (await api.get<LeaveRequest>(`/leaves/requests/${id}`)).data,
+  cancel: async (id: string, input: RequestAction) => (await api.post<LeaveRequest>(`/leaves/requests/${id}/cancel`, input)).data,
+  reject: async (id: string, input: RequestAction) => (await api.post<LeaveRequest>(`/leaves/requests/${id}/reject`, input)).data,
+  route: async (id: string, input: components["schemas"]["RequestRoute"]) => (await api.post<LeaveRequest>(`/leaves/requests/${id}/route`, input)).data,
+};
