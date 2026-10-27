@@ -9,6 +9,7 @@ interface UploadOptions<T> {
   callbackEndpoint: string;
   allowedTypes: readonly string[];
   maxSize: number;
+  validationMessage?: string;
   onComplete?: (result: T) => void;
 }
 
@@ -27,7 +28,7 @@ export function useFileUpload<T>(options: UploadOptions<T>) {
     setProgress(0);
     try {
       if (!options.allowedTypes.includes(file.type) || file.size <= 0 || file.size > options.maxSize) {
-        throw new Error("Choose a JPEG, PNG or WebP image up to 5MB.");
+        throw new Error(options.validationMessage ?? "Choose a JPEG, PNG or WebP image up to 5MB.");
       }
       const { data: signed } = await api.post<{
         uploadUrl: string; objectKey: string; headers: Record<string, string>;
@@ -46,7 +47,7 @@ export function useFileUpload<T>(options: UploadOptions<T>) {
       return data;
     } catch (cause) {
       const message = cause && typeof cause === "object" && "message" in cause
-        ? String(cause.message) : "Photo upload failed. Please try again.";
+        ? String(cause.message) : "File upload failed. Please try again.";
       setError(message);
       return undefined;
     } finally {

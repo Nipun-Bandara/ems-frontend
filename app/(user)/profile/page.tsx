@@ -9,6 +9,7 @@ import { useAuth } from "@/app/context/AuthContext";
 import { employeeProfileKey, useEmployeeProfile, useUpdateMyProfile, type EmployeeProfile, type UpdateEmployeeProfile } from "@/app/hooks/useEmployeeProfile";
 import { useFileUpload } from "@/app/hooks/useFileUpload";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/app/components/ui/Tabs";
+import CvSection, { CvUpload } from "./_components/CvSections";
 import { UserRound, Pencil, Check } from "lucide-react";
 
 const phone = z.string().max(30).refine((v) => !v || /^\+?[0-9][0-9 ()-]{5,29}$/.test(v), "Enter a valid phone number");
@@ -122,7 +123,7 @@ function ProfileDetails({ profile, userId }: { profile: EmployeeProfile; userId?
       <div key={name} className={name === "address" ? "sm:col-span-2" : ""}>
         {editing ? <>
           <label htmlFor={name} className="mb-2 block text-sm font-medium">{label}{["firstName", "lastName"].includes(name) && " *"}</label>
-          <input {...form.register(name)} id={name} type={type} maxLength={maxLength} required={name === "firstName" || name === "lastName"} min={type === "number" ? 1 : undefined}
+          <input form="profile-details-form" {...form.register(name)} id={name} type={type} maxLength={maxLength} required={name === "firstName" || name === "lastName"} min={type === "number" ? 1 : undefined}
             step={type === "number" ? 1 : undefined} aria-invalid={!!form.formState.errors[name]}
             aria-describedby={form.formState.errors[name] ? `${name}-error` : hint ? `${name}-hint` : undefined}
             className="w-full rounded-lg border border-current/20 bg-backgroundPrimary px-3 py-2.5 text-sm outline-offset-2" />
@@ -154,19 +155,23 @@ function ProfileDetails({ profile, userId }: { profile: EmployeeProfile; userId?
         <p className="mt-1 text-xs text-textSecondary">JPEG, PNG or WebP, up to 5MB.</p>
       </div>
       {!editing && <button type="button" className={button} disabled={busy} onClick={() => {
-        form.reset(values(profile)); update.reset(); setSaved(false); setEditing(true);
+        form.reset(values(profile)); update.reset(); setSaved(false); setTab("basic"); setEditing(true);
       }}><Pencil size={16} />Edit profile</button>}
     </div>
     {isUploading && <div role="status" className="mb-4"><progress value={progress} max={100} className="w-full" /><p>{progress < 99 ? `Uploading ${progress}%` : "Saving photo…"}</p></div>}
     {!isUploading && progress === 100 && !error && <p role="status" className="mb-4">Profile photo updated.</p>}
     {error && <p role="alert" className="mb-4 text-red-500">{error}</p>}
     {saved && <p role="status" className="mb-4 flex items-center gap-2"><Check size={16} />Profile saved.</p>}
-    <form noValidate onSubmit={form.handleSubmit(save, invalid)}>
+    <div>
+      <form id="profile-details-form" noValidate onSubmit={form.handleSubmit(save, invalid)} />
       <fieldset disabled={update.isPending} className="min-w-0">
         <Tabs value={tab} onValueChange={(value) => setTab(String(value))}>
-          <TabsList className="mb-7 border-b border-current/10 pb-3">
+          <TabsList className="mb-7 max-w-full overflow-x-auto border-b border-current/10 pb-3">
             <TabsTrigger value="basic" className="px-4 py-2">Basic info</TabsTrigger>
             <TabsTrigger value="personal" className="px-4 py-2">Personal info</TabsTrigger>
+            <TabsTrigger value="skills" className="px-4 py-2" disabled={editing}>Skills</TabsTrigger>
+            <TabsTrigger value="education" className="px-4 py-2" disabled={editing}>Education</TabsTrigger>
+            <TabsTrigger value="experience" className="px-4 py-2" disabled={editing}>Experience</TabsTrigger>
           </TabsList>
           <TabsContent value="basic" keepMounted>
             <dl className="mb-6 grid gap-6 sm:grid-cols-2">
@@ -178,15 +183,19 @@ function ProfileDetails({ profile, userId }: { profile: EmployeeProfile; userId?
             {fields(basic)}
           </TabsContent>
           <TabsContent value="personal" keepMounted>{fields(personal)}</TabsContent>
+          {(["skills", "education", "experience"] as const).map((section) => <TabsContent key={section} value={section}>
+            <CvSection section={section} userId={userId} />
+          </TabsContent>)}
         </Tabs>
         {editing && <>
           {update.isError && <p role="alert" className="mt-6 text-sm text-red-500">{update.error.message || "Unable to save your profile. Please try again."}</p>}
           <div className="mt-8 flex justify-end gap-3 border-t border-current/10 pt-5">
             <button type="button" className={button} onClick={() => { form.reset(values(profile)); setEditing(false); update.reset(); }}>Cancel</button>
-            <button type="submit" className={`${button} bg-textPrimary text-backgroundPrimary`} disabled={busy}>{update.isPending ? "Saving…" : "Save changes"}</button>
+            <button type="submit" form="profile-details-form" className={`${button} bg-textPrimary text-backgroundPrimary`} disabled={busy}>{update.isPending ? "Saving…" : "Save changes"}</button>
           </div>
         </>}
       </fieldset>
-    </form>
+    </div>
+    <CvUpload userId={userId} />
   </section>;
 }

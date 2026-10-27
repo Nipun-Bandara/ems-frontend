@@ -13,7 +13,7 @@ export default function Modal({ title, onClose, children }: {
     return () => dialog?.close();
   }, []);
   return (
-    <dialog ref={ref} onCancel={onClose} aria-labelledby="organization-dialog-title"
+    <dialog ref={ref} onCancel={(event) => { event.preventDefault(); onClose(); }} aria-labelledby="organization-dialog-title"
       className="m-auto max-h-[90vh] w-[calc(100%_-_2rem)] max-w-2xl overflow-y-auto rounded-2xl border border-borderPrimary bg-backgroundSecondary p-6 text-textPrimary shadow-xl backdrop:bg-black/50">
       <div className="mb-5 flex items-center justify-between gap-4">
         <h2 id="organization-dialog-title" className="text-xl font-semibold">{title}</h2>
