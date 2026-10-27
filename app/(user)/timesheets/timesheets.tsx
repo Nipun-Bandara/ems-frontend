@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+import History from "./history";
 import { useState } from "react";
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -9,7 +11,7 @@ import { toast } from "sonner";
 import { useAuth } from "@/app/context/AuthContext";
 import { Button } from "@/app/components/ui/Button";
 import type { ApiError } from "@/app/lib/axios";
-import { timesheetApi, type Entry, type Project, type Sheet } from "@/app/services/timesheets";
+import { timesheetApi, type Entry, type Project, type Sheet } from "./api";
 
 const field = "w-full rounded-lg border border-borderPrimary bg-background px-2 py-2 text-textPrimary disabled:opacity-60";
 const schema = z.object({ rows: z.array(z.object({
@@ -39,10 +41,12 @@ function ErrorMessage({ error }: { error: unknown }) {
 export default function Timesheets() {
   const { user } = useAuth();
   const [week, setWeek] = useState("");
+  const permissions = useQuery({ queryKey: ["timesheet-permissions", user?.id], queryFn: timesheetApi.permissions, enabled: !!user });
   const calendar = useQuery({ queryKey: ["timesheets", user?.id, "calendar"], queryFn: timesheetApi.calendar, enabled: !!user, retry: false });
   const selected = week || calendar.data?.currentWeekStart;
   return <main className="flex-1 overflow-auto p-6 text-textPrimary space-y-5">
     <h1 className="text-2xl font-semibold">My timesheets</h1>
+    {permissions.data?.reviewer && <Link className="underline" href="/timesheets/review">Review submitted timesheets</Link>}
     <p>Record whole minutes for each project and day. Submit your week when it is ready.</p>
     {calendar.isPending && <p role="status">Loading organization calendar…</p>}
     <ErrorMessage error={calendar.error} />{calendar.isError && <Button onClick={() => calendar.refetch()}>Retry calendar</Button>}
@@ -61,6 +65,7 @@ function Editor({ initial, week, projects, projectsError, projectsLoading, retry
   initial: Sheet | null; week: string; projects: Project[]; projectsError: unknown; projectsLoading: boolean;
   retryProjects: () => void; changeWeek: (week: string) => void;
 }) {
+  const { user } = useAuth();
   const days = dates(week);
   const [sheet, setSheet] = useState(initial);
   const [pendingSubmit, setPendingSubmit] = useState<{ id: string; version: number } | null>(null);
@@ -95,7 +100,11 @@ function Editor({ initial, week, projects, projectsError, projectsLoading, retry
   const remove = useMutation({ mutationFn: async () => { if (sheet) await timesheetApi.remove(sheet.id, sheet.version); }, onSuccess: () => {
     setSheet(null); form.reset({ rows: [blank()] }); mutation.reset(); setNotice("Draft deleted.");
   } });
-  const busy = mutation.isPending || reload.isPending || remove.isPending;
+  const permissions = useQuery({ queryKey: ["timesheet-permissions", user?.id], queryFn: timesheetApi.permissions, enabled: !!user });
+  const reopen = useMutation({ mutationFn: async () => timesheetApi.reopen(sheet!.id, sheet!.version), onSuccess: result => {
+    setSheet(result); setPendingSubmit(null); form.reset(rowsFrom(result, days)); mutation.reset(); setNotice("Reopened. Update the draft and submit it for a new review.");
+  } });
+  const busy = mutation.isPending || reload.isPending || remove.isPending || reopen.isPending;
   const disabled = frozen || busy || !!pendingSubmit;
   const dirty = form.formState.isDirty;
   const openWeek = (value: string) => {
@@ -120,7 +129,7 @@ function Editor({ initial, week, projects, projectsError, projectsLoading, retry
         <tbody>{rows.fields.map((row, index) => {
           const selected = projects.find(p => String(p.id) === values[index]?.projectId);
           return <tr key={row.id}>
-            <td className="p-2 min-w-40"><select className={field} aria-label={`Project row ${index + 1}`} disabled={disabled} {...form.register(`rows.${index}.projectId`)}>
+            <td className="p-2 min-w-40"><select className={field} aria-label={`Project row ${index + 1}`} value={values[index]?.projectId ?? ""} disabled={disabled} {...form.register(`rows.${index}.projectId`)}>
               <option value="">Choose project</option>
               {values[index]?.projectId && !selected && <option value={values[index].projectId}>Project #{values[index].projectId} (unavailable)</option>}
               {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
@@ -134,7 +143,7 @@ function Editor({ initial, week, projects, projectsError, projectsLoading, retry
         <tfoot><tr><th colSpan={2} className="p-2 text-left">Daily totals (minutes)</th>{totals.map((total, i) => <td key={days[i]} className={`p-2 text-center ${total > 1440 ? "text-red-600 font-bold" : ""}`}>{total}{total > 1440 && <span className="block">Over 24h</span>}</td>)}<td className="p-2 font-bold" aria-label="Weekly total">{totals.reduce((a, b) => a + b, 0)}</td><td /></tr></tfoot>
       </table></div>
       {form.formState.errors.rows && <p role="alert" className="text-red-600">Check every row: choose a project, add a short description, and use whole nonnegative minutes.</p>}
-      <ErrorMessage error={mutation.error} /><ErrorMessage error={reload.error} /><ErrorMessage error={remove.error} />
+      <ErrorMessage error={mutation.error} /><ErrorMessage error={reload.error} /><ErrorMessage error={remove.error} /><ErrorMessage error={reopen.error} />
       {notice && <p role="status">{notice}</p>}
       {pendingSubmit && <p role="alert">Submission has not been confirmed. Your saved entries are retained. Retry submission to retrieve its result, or reload the saved sheet to check its status.</p>}
       <div className="flex flex-wrap gap-3">
@@ -144,10 +153,12 @@ function Editor({ initial, week, projects, projectsError, projectsLoading, retry
         <Button type="button" disabled={busy} onClick={() => {
           if (!dirty || window.confirm("Discard unsaved edits and reload the saved sheet?")) reload.mutate();
         }}>Reload saved sheet</Button>
-        {sheet?.status === "DRAFT" && <Button type="button" disabled={busy || !!pendingSubmit} onClick={() => { if (window.confirm("Delete this draft and its entries?")) remove.mutate(); }}>Delete draft</Button>}
+        {sheet?.status === "REJECTED" && permissions.data?.active && <Button type="button" disabled={busy} onClick={() => reopen.mutate()}>Reopen rejected timesheet</Button>}
+        {sheet?.status === "DRAFT" && sheet.decisions.length === 0 && <Button type="button" disabled={busy || !!pendingSubmit} onClick={() => { if (window.confirm("Delete this draft and its entries?")) remove.mutate(); }}>Delete draft</Button>}
       </div>
       {!frozen && dirty && <p>Save your draft before submitting. Submitted entries cannot be edited.</p>}
-      {frozen && <p>Submitted entries are frozen. Review decisions will be available in a later item.</p>}
+      {frozen && <p>Entries are frozen. A rejected timesheet must be reopened before editing.</p>}
     </form>
+    {sheet && <History sheet={sheet} />}
   </section>;
 }
