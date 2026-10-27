@@ -1,19 +1,11 @@
 "use client";
 
-import React from "react";
 import { useTheme } from "next-themes";
-import { useEffect, useState } from "react";
 import { cn } from "@/app/lib/utils";
 
 
 export const ThemeToggle = ({ className }: { className?: string }) => {
   const { setTheme, resolvedTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-  const timeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   return (
     <button
@@ -58,14 +50,7 @@ export const ThemeToggle = ({ className }: { className?: string }) => {
       )}
     >
       <div
-        className="absolute inset-0 flex items-center justify-center transition-all duration-300"
-        style={{
-          opacity: mounted && resolvedTheme === "dark" ? 1 : 0,
-          transform:
-            mounted && resolvedTheme === "dark"
-              ? "scale(1) rotate(0deg)"
-              : "scale(0.5) rotate(90deg)",
-        }}
+        className="absolute inset-0 flex items-center justify-center transition-all duration-300 opacity-0 scale-50 rotate-90 dark:opacity-100 dark:scale-100 dark:rotate-0"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -84,14 +69,7 @@ export const ThemeToggle = ({ className }: { className?: string }) => {
         </svg>
       </div>
       <div
-        className="absolute inset-0 flex items-center justify-center transition-all duration-300"
-        style={{
-          opacity: mounted && resolvedTheme === "light" ? 1 : 0,
-          transform:
-            mounted && resolvedTheme === "light"
-              ? "scale(1) rotate(0deg)"
-              : "scale(0.5) rotate(-90deg)",
-        }}
+        className="absolute inset-0 flex items-center justify-center transition-all duration-300 opacity-100 scale-100 rotate-0 dark:opacity-0 dark:scale-50 dark:-rotate-90"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"

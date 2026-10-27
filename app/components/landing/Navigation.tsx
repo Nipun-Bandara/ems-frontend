@@ -7,7 +7,6 @@ import {
   useMotionValueEvent,
   useScroll,
 } from "motion/react";
-import { useTheme } from "next-themes";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -25,16 +24,10 @@ export const Navigation = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const router = useRouter(); // Initialize router
   const { scrollY } = useScroll();
-  const { setTheme, resolvedTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const { user } = useAuth();
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   useEffect(() => {
     const checkMobile = () => {
