@@ -7,7 +7,8 @@
     "build": "next build",
     "gen:api": "openapi-typescript http://localhost:8080/v3/api-docs -o app/types/api.d.ts",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "gen:api:employee": "openapi-typescript ../ems-backend/docs/openapi/employee-profile.json -o app/types/employee-api.d.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.4.1",
