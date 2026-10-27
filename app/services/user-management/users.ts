@@ -39,9 +39,9 @@ export async function getAllUsers(params: GetUsersParams): Promise<PaginatedUser
 export async function assignUser(
     userId: number | string,
     payload: { role?: string; departmentId?: number | null }
-): Promise<any> {
+): Promise<UserResponse> {
     const path = API_PATHS.USERS.USER_ASSIGNMENT.replace("{id}", String(userId));
-    const res = await axios.put(path, payload);
+    const res = await axios.put<UserResponse>(path, payload);
     return res.data;
 }
 
