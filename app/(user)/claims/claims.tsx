@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Receipts, useReceipts } from "./receipts";
 import { useState } from "react";
 import { useForm, useFieldArray, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -40,6 +41,7 @@ function ClaimLines({ claim }: { claim: Claim }) {
  return <div className="overflow-x-auto"><table className="w-full text-left"><caption className="sr-only">Expense line items</caption><thead><tr>{["Category", "Expense date", "Description", "Currency", "Amount"].map(label => <th className="p-2" key={label}>{label}</th>)}</tr></thead><tbody>{claim.lines.map((l, i) => <tr key={i}>{[l.category, l.expenseDate, l.description, l.currency, l.amount].map((value, index) => <td className="p-2 whitespace-pre-wrap" key={index}>{value}</td>)}</tr>)}</tbody></table></div>;
 }
 function Editor({ claim, changed, removed }: { claim: Claim; changed: (claim: Claim) => void; removed: () => void }) {
+ const receipts = useReceipts(claim.id);
  const [notice, setNotice] = useState("");
  const form = useForm<Values>({ resolver: zodResolver(schema), defaultValues: { lines: claim.lines } });
  const rows = useFieldArray({ control: form.control, name: "lines" });
@@ -75,12 +77,13 @@ function Editor({ claim, changed, removed }: { claim: Claim; changed: (claim: Cl
     <p>Draft total: <output>{claim.currency} {exactTotal(values)}</output></p>
     <div className="flex flex-wrap gap-2">
      <Button type="submit">Save draft</Button>
-     <Button type="button" disabled={form.formState.isDirty || claim.lines.length === 0} onClick={() => mutation.mutate({ action: "submit" })}>Submit claim</Button>
+     <Button type="button" disabled={form.formState.isDirty || claim.lines.length === 0 || !receipts.data?.length} onClick={() => mutation.mutate({ action: "submit" })}>Submit claim</Button>
      <Button type="button" onClick={() => mutation.mutate({ action: "delete" })}>Delete draft</Button>
     </div>
     <p className="text-sm">Save your changes before submitting. Submitted lines are frozen.</p>
    </fieldset>
   </form> : <><ClaimLines claim={claim} />{claim.status === "SUBMITTED" && <Button disabled={mutation.isPending} onClick={() => mutation.mutate({ action: "withdraw" })}>Withdraw pending claim</Button>}</>}
+  <Receipts id={claim.id} draft={draft} />
   <ClaimHistory claim={claim} />
  </section>;
 }
@@ -103,7 +106,7 @@ function ReviewDetail({ id, changed }: { id: string; changed: () => void }) {
   <div className="flex flex-wrap gap-2">
    <Button disabled={decision.isPending || claim.status !== "SUBMITTED"} onClick={() => decision.mutate(false)}>Approve for reimbursement</Button>
    <Button disabled={decision.isPending || claim.status !== "SUBMITTED" || !reason.trim()} onClick={() => decision.mutate(true)}>Reject claim</Button>
-  </div><ClaimHistory claim={claim} />
+  </div><Receipts id={claim.id} /><ClaimHistory claim={claim} />
  </section>;
 }
 export default function Claims({ review = false }: { review?: boolean }) {
