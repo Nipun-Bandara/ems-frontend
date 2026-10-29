@@ -15,6 +15,12 @@ export interface NavItem {
 
 export const NAV_ITEMS: NavItem[] = [
   {
+    id: "claims",
+    label: "Expense claims",
+    href: "/claims",
+    roles: ["SYSTEM_ADMIN", "HR_MANAGER", "FINANCE_MANAGER", "DEPARTMENT_HEAD", "EMPLOYEE", "USER"],
+  },
+  {
     id: "leave-management",
     label: "Leave Management",
     href: "/leave-management",
@@ -103,6 +109,7 @@ import { Home, User, Settings, DollarSign, Users, Layers, LogOut, BriefcaseBusin
 import type { ComponentType, SVGProps } from "react";
 
 export const ICONS_MAP: Record<string, ComponentType<SVGProps<SVGSVGElement>>> = {
+  "claims": DollarSign,
   "leave-management": BriefcaseBusiness,
   dashboard: Home,
   organization: Users,
